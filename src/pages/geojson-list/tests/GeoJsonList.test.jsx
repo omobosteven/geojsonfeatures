@@ -1,16 +1,18 @@
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { GeoJsonList } from "pages/geojson-list/GeoJsonList";
 import { App } from "../../../App";
 import userEvent from "@testing-library/user-event";
+import { server } from "mocks/server";
+import { rest } from "msw";
 
-test("should show spinner if spinner is true", async () => {
+test("should show spinner if spinner is true", () => {
   render(<GeoJsonList isLoading data={data} />);
 
   const spinner = screen.getByRole("progressbar");
   expect(spinner).toBeInTheDocument();
 });
 
-test("should render data if spinner is false", () => {
+test("should render data if spinner is false", async () => {
   render(<GeoJsonList isLoading={false} data={data} />);
 
   const countHeading = screen.getByRole("heading", {
@@ -27,7 +29,7 @@ test("should render data if spinner is false", () => {
   expect(locationItem).toBeInTheDocument();
 });
 
-test("should be able to open and close geometry and properties data", async () => {
+test("should be able to open and close geometry and properties item", async () => {
   render(<GeoJsonList isLoading={false} data={data} />);
 
   const propertiesItem = screen.getByRole("heading", {
@@ -81,18 +83,21 @@ test("get geojson feature happy path", async () => {
   userEvent.type(maxLongitudeInput, "0.1");
   userEvent.type(maxLatitudeInput, "0.1");
 
-  const noHeader = screen.queryByRole("heading", {
+  const noCountHeading = screen.queryByRole("heading", {
     name: /count: 2/i,
   });
-  expect(noHeader).not.toBeInTheDocument();
+  expect(noCountHeading).not.toBeInTheDocument();
 
   const submitBtn = screen.getByRole("button", { name: /search/i });
   userEvent.click(submitBtn);
 
-  const countHeading = await screen.findByRole("heading", {
-    name: /count: 2/i,
-  });
-  expect(countHeading).toBeInTheDocument();
+  await waitFor(async () =>
+    expect(
+      await screen.findByRole("heading", {
+        name: /count: 2/i,
+      })
+    ).toBeInTheDocument()
+  );
 
   const clearBtn = screen.getByRole("button", { name: /clear/i });
   userEvent.click(clearBtn);
@@ -116,6 +121,17 @@ test("get geojson feature happy path", async () => {
 });
 
 test("error response from server when bbox is too large", async () => {
+  server.resetHandlers(
+    rest.get("https://www.openstreetmap.org/api/0.6/map", (req, res, ctx) => {
+      return res(
+        ctx.status(400),
+        ctx.text(
+          "The maximum bbox size is 0.250000, and your request was too large. Either request a smaller area, or use planet.osm"
+        )
+      );
+    })
+  );
+
   render(<App />);
 
   const minLongitudeInput = screen.getByRole("spinbutton", {
@@ -152,6 +168,17 @@ test("error response from server when bbox is too large", async () => {
 });
 
 test("error message if too many nodes is requested", async () => {
+  server.resetHandlers(
+    rest.get("https://www.openstreetmap.org/api/0.6/map", (req, res, ctx) => {
+      return res(
+        ctx.status(400),
+        ctx.text(
+          "You requested too many nodes (limit is 50000). Either request a smaller area, or use planet.osm"
+        )
+      );
+    })
+  );
+
   render(<App />);
 
   const minLongitudeInput = screen.getByRole("spinbutton", {

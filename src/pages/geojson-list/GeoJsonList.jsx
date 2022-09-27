@@ -16,9 +16,7 @@ export const GeoJsonList = ({ isLoading, data }) => {
         <StyledDataSetContainer>
           {data?.features && (
             <StyledHeader>
-              <h4 id="collection" className="heading">
-                Collection
-              </h4>
+              <h4 className="heading">Collection</h4>
               <h4 className="count">
                 <span className="count__title">Count:</span>{" "}
                 <span className="count__value">{data?.features.length}</span>
@@ -30,10 +28,13 @@ export const GeoJsonList = ({ isLoading, data }) => {
               viewportRef={ref}
               items={data?.features || []}
               itemMinSize={42}
-              aria-labelledby="collection"
             >
               {(item) => (
-                <div key={item.id} className="item" role="listitem">
+                <div
+                  key={item.id}
+                  className="item"
+                  role="listitem"
+                >
                   <DataDisplay title="id" value={item.id} />
                   <DataDisplay title="type" value={item.type} />
                   <TreeDataDisplay title="geometry" data={item.geometry} />
