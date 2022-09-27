@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "@emotion/styled";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown, faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import { CoordinatesDisplay } from "pages/geojson-list/common/CoordinatesDisplay";
+// import { CoordinatesDisplay } from "pages/geojson-list/common/CoordinatesDisplay";
 
 export const TreeDataDisplay = ({ title, data }) => {
   const [showData, setShowData] = useState(false);
@@ -21,26 +21,27 @@ export const TreeDataDisplay = ({ title, data }) => {
           color="#157390"
         />
       </h5>
-      <>
-        {showData &&
-          Object.entries(data).map((property, index) => {
+      {showData && (
+        <div role="list">
+          {Object.entries(data).map((property, index) => {
             const isCoordinates = property[0]?.toLowerCase() === "coordinates";
 
             return (
               <div
                 className={`data ${isCoordinates ? "data-column" : ""}`}
                 key={`${property[0]}${index}`}
+                role="listitem"
               >
                 <h5 className="data__title">{property[0]}</h5>
-                {isCoordinates ? (
-                  <CoordinatesDisplay coordinates={data.coordinates} />
-                ) : (
-                  <span className="data__value">{property[1]}</span>
-                )}
+                <span className="data__value">
+                  {isCoordinates ? JSON.stringify(property[1]) : property[1]}
+                </span>
               </div>
             );
           })}
-      </>
+          }
+        </div>
+      )}
     </StyledDiv>
   );
 };

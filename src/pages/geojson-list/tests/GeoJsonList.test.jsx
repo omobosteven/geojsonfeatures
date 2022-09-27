@@ -1,31 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import { GeoJsonList } from "pages/geojson-list/GeoJsonList";
 import { App } from "../../../App";
 import userEvent from "@testing-library/user-event";
-
-const data = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      id: "node/3815077900",
-      geometry: { type: "Point", coordinates: [0, 0] },
-      properties: {
-        version: 125,
-        name: "Soul Buoy",
-      },
-    },
-    {
-      type: "Feature",
-      id: "node/3815077910",
-      geometry: { type: "Point", coordinates: [0, 0] },
-      properties: {
-        version: 126,
-        name: "Soul Bay",
-      },
-    },
-  ],
-};
 
 test("should show spinner if spinner is true", async () => {
   render(<GeoJsonList isLoading data={data} />);
@@ -34,7 +10,7 @@ test("should show spinner if spinner is true", async () => {
   expect(spinner).toBeInTheDocument();
 });
 
-test("should render data if spinner is false", async () => {
+test("should render data if spinner is false", () => {
   render(<GeoJsonList isLoading={false} data={data} />);
 
   const countHeading = screen.getByRole("heading", {
@@ -42,13 +18,41 @@ test("should render data if spinner is false", async () => {
   });
 
   const list = screen.getByRole("list");
-  const locationItem1 = screen.getByRole("treeitem", {
+  const locationItem = within(list).getByRole("treeitem", {
     name: /id node\/3815077900/i,
   });
 
   expect(countHeading).toBeInTheDocument();
-  expect(locationItem1).toBeInTheDocument();
   expect(list).toBeInTheDocument();
+  expect(locationItem).toBeInTheDocument();
+});
+
+test("should be able to open and close geometry and properties data", async () => {
+  render(<GeoJsonList isLoading={false} data={data} />);
+
+  const propertiesItem = screen.getByRole("heading", {
+    name: /properties/i,
+  });
+  const geomentryItem = screen.getByRole("heading", {
+    name: /geometry point/i,
+  });
+
+  userEvent.click(propertiesItem);
+  const versionProperty = screen.getByRole("heading", { name: /version/i });
+
+  userEvent.click(geomentryItem);
+  const coordinatesProperty = screen.getByRole("heading", {
+    name: /coordinates/i,
+  });
+
+  expect(versionProperty).toBeInTheDocument();
+  expect(coordinatesProperty).toBeInTheDocument();
+
+  userEvent.click(propertiesItem);
+  expect(versionProperty).not.toBeInTheDocument();
+
+  userEvent.click(geomentryItem);
+  expect(coordinatesProperty).not.toBeInTheDocument();
 });
 
 test("get geojson feature happy path", async () => {
@@ -76,6 +80,11 @@ test("get geojson feature happy path", async () => {
   userEvent.type(minLatitudeInput, "0");
   userEvent.type(maxLongitudeInput, "0.1");
   userEvent.type(maxLatitudeInput, "0.1");
+
+  const noHeader = screen.queryByRole("heading", {
+    name: /count: 2/i,
+  });
+  expect(noHeader).not.toBeInTheDocument();
 
   const submitBtn = screen.getByRole("button", { name: /search/i });
   userEvent.click(submitBtn);
@@ -177,3 +186,27 @@ test("error message if too many nodes is requested", async () => {
     "You requested too many nodes (limit is 50000). Either request a smaller area, or use planet.osm"
   );
 });
+
+const data = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      id: "node/3815077900",
+      geometry: { type: "Point", coordinates: [0, 0] },
+      properties: {
+        version: 125,
+        name: "Soul Buoy",
+      },
+    },
+    {
+      type: "Feature",
+      id: "node/3815077910",
+      geometry: { type: "Point", coordinates: [0, 0] },
+      properties: {
+        version: 126,
+        name: "Soul Bay",
+      },
+    },
+  ],
+};
