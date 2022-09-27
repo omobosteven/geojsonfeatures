@@ -1,10 +1,10 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import styled from "@emotion/styled";
-import { InputField } from "pages/geolocation-box/InputField";
+import { InputField } from "pages/geolocation-box/common/InputField";
 import { schema } from "utilities/inputValdation";
 
-export const GeolocationBox = () => {
+export const GeolocationBox = ({ getData }) => {
   const {
     register,
     handleSubmit,
@@ -14,9 +14,9 @@ export const GeolocationBox = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const bbox = `${data.minLong},${data.minLat},${data.maxLong},${data.maxLat}`;
-    console.log(bbox);
+    await getData(bbox);
   };
 
   return (
