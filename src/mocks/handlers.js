@@ -3,25 +3,7 @@ import { rest } from "msw";
 export const handlers = [
   rest.get("https://www.openstreetmap.org/api/0.6/map", (req, res, ctx) => {
     const bbox = req.url.searchParams.get("bbox");
-    // console.log({ bbox });
 
-    if (bbox === "0,0,1,1") {
-      return res(
-        ctx.status(400),
-        ctx.text(
-          "The maximum bbox size is 0.250000, and your request was too large. Either request a smaller area, or use planet.osm"
-        )
-      );
-    }
-
-    if (bbox === "10,10,10.5,10.4") {
-      return res(
-        ctx.status(400),
-        ctx.text(
-          "You requested too many nodes (limit is 50000). Either request a smaller area, or use planet.osm"
-        )
-      );
-    }
     return res(ctx.json(customResponseBasedonQueryParams[bbox]));
   }),
 ];

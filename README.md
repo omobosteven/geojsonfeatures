@@ -30,4 +30,4 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 
 ### Improvements that can be made
 - Add a `scroll to top` button when scrolling through the dataset
-- Find a way to properly test the dataset render inside the `ViewportList` component
+- Find a way to properly test the dataset render inside the `ViewportList` component. Currently, only one item is rendered in the `ViewportList` component during testing.
