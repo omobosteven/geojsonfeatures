@@ -15,6 +15,5 @@ export const CoordinatesDisplay = ({ coordinates }) => {
     );
   };
 
-  // return <>{JSON.stringify(coordinates)}</>;
   return <>{getCoordinates(coordinates)}</>;
 };
