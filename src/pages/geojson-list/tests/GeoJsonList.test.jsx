@@ -4,7 +4,20 @@ import { App } from "../../../App";
 import userEvent from "@testing-library/user-event";
 import { server } from "mocks/server";
 import { rest } from "msw";
+import { MockViewportList } from "mocks/react-viewport-list";
+import { renderListFunction as mockRenderListFunction } from "pages/geojson-list/GeoJsonList";
 
+jest.mock("react-viewport-list", () => {
+  const lib = jest.requireActual("react-viewport-list");
+
+  return {
+    __esModule: true,
+    ...lib,
+    ViewportList: ({ items }) => (
+      <MockViewportList items={items} children={mockRenderListFunction} />
+    ),
+  };
+});
 test("should show spinner if spinner is true", () => {
   render(<GeoJsonList isLoading data={data} />);
 
@@ -15,34 +28,38 @@ test("should show spinner if spinner is true", () => {
 test("should render data if spinner is false", async () => {
   render(<GeoJsonList isLoading={false} data={data} />);
 
-  const countHeading = screen.getByRole("heading", {
+  const countHeading = await screen.findByRole("heading", {
     name: /count: 2/i,
   });
 
-  const list = screen.getByRole("list");
+  const list = await screen.findByRole("list");
   const locationItem = within(list).getByRole("treeitem", {
     name: /id node\/3815077900/i,
+  });
+  const locationItem2 = within(list).getByRole("treeitem", {
+    name: /id node\/3815077910/i,
   });
 
   expect(countHeading).toBeInTheDocument();
   expect(list).toBeInTheDocument();
   expect(locationItem).toBeInTheDocument();
+  expect(locationItem2).toBeInTheDocument();
 });
 
 test("should be able to open and close geometry and properties item", async () => {
   render(<GeoJsonList isLoading={false} data={data} />);
 
-  const propertiesItem = screen.getByRole("heading", {
+  const propertiesItem = await screen.findAllByRole("heading", {
     name: /properties/i,
   });
-  const geomentryItem = screen.getByRole("heading", {
+  const geomentryItem = await screen.findAllByRole("heading", {
     name: /geometry point/i,
   });
 
-  userEvent.click(propertiesItem);
+  userEvent.click(propertiesItem[0]);
   const versionProperty = screen.getByRole("heading", { name: /version/i });
 
-  userEvent.click(geomentryItem);
+  userEvent.click(geomentryItem[0]);
   const coordinatesProperty = screen.getByRole("heading", {
     name: /coordinates/i,
   });
@@ -50,10 +67,10 @@ test("should be able to open and close geometry and properties item", async () =
   expect(versionProperty).toBeInTheDocument();
   expect(coordinatesProperty).toBeInTheDocument();
 
-  userEvent.click(propertiesItem);
+  userEvent.click(propertiesItem[0]);
   expect(versionProperty).not.toBeInTheDocument();
 
-  userEvent.click(geomentryItem);
+  userEvent.click(geomentryItem[0]);
   expect(coordinatesProperty).not.toBeInTheDocument();
 });
 
@@ -114,10 +131,10 @@ test("get geojson feature happy path", async () => {
 
   userEvent.click(submitBtn);
 
-  const countHeading2 = await screen.findByRole("heading", {
+  const countHeading = await screen.findByRole("heading", {
     name: /count: 1/i,
   });
-  expect(countHeading2).toBeInTheDocument();
+  expect(countHeading).toBeInTheDocument();
 });
 
 test("error response from server when bbox is too large", async () => {

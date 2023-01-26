@@ -6,7 +6,9 @@ import { useState } from "react";
 import axios from "axios";
 import osmtogeojson from "osmtogeojson";
 
-const api = axios.create();
+const api = axios.create({
+  headers: { "Cache-Control": "max-age=10800" },
+});
 
 export const App = () => {
   const [data, setData] = useState(null);

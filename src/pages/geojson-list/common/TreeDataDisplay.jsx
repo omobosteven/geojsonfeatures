@@ -34,12 +34,15 @@ export const TreeDataDisplay = ({ title, data }) => {
               >
                 <h5 className="data__title">{property[0]}</h5>
                 <span className="data__value">
-                  {isCoordinates ? JSON.stringify(property[1]) : property[1]}
+                  {isCoordinates ? (
+                    <pre>{JSON.stringify(property[1])}</pre>
+                  ) : (
+                    property[1]
+                  )}
                 </span>
               </div>
             );
           })}
-          }
         </div>
       )}
     </StyledDiv>
@@ -94,6 +97,10 @@ const StyledDiv = styled.div({
       fontSize: "15px",
       color: "#072731",
       wordBreak: "break-word",
+
+      "& pre": {
+        whiteSpace: "pre-wrap",
+      },
     },
 
     "@media screen and (min-width: 768px)": {

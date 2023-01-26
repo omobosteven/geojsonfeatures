@@ -30,4 +30,6 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 
 ### Improvements that can be made
 - Add a `scroll to top` button when scrolling through the dataset
-- Find a way to properly test the dataset render inside the `ViewportList` component. Currently, only one item is rendered in the `ViewportList` component during testing.
+- On initial scroll within `ViewportList` component, page should scroll up
+
+[GeoJson Specification](https://gist.github.com/sgillies/1233327)
